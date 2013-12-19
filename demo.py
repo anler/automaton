@@ -27,6 +27,10 @@ def draw_state_machine(state_machine, output):
     graph.draw(output)
 
 
+def alphabet(regex):
+    return "{%s}" % ", ".join(str(i) for i in regex.alphabet())
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('regex', help='The regular expression')
@@ -39,7 +43,7 @@ def main():
     state_machine = to_state_machine(regex)
 
     print(u"Regular Expression:", regex)
-    print(u"Regular Expression Alphabet (∑):", "{", ", ".join(regex.alphabet()), "}")
+    print(u"Regular Expression Alphabet (∑):", alphabet(regex))
 
     draw_state_machine(state_machine, output=args.output_filename)
 
