@@ -2,27 +2,16 @@
 import string
 
 GRAMMAR = """
-constant = anything:atom ?(atom in '{letters}{digits}') -> Constant(atom)
-concat = concat:left constant:right -> Concat(left, right)
-concat = concat:left choice:right -> Concat(left, right)
-concat = constant:left constant:right repetition -> Concat(left, Repeat(right))
-concat = constant:left constant:right -> Concat(left, right)
-concat = constant:left choice:right -> Concat(left, right)
-
-choice = concat:left '|' concat:right -> Choice(left, right)
-choice = constant:left '|' concat:right -> Choice(left, right)
-choice = choice:left constant:right -> Concat(left, right)
-choice = '(' constant:left '|' constant:right ')' -> Choice(left, right)
-choice = '(' concat:left '|' concat:right ')' -> Choice(left, right)
-choice = concat:left '|' constant:right -> Choice(left, right)
-choice = constant:left '|' constant:right -> Choice(left, right)
-
 repetition = '*'
 
-repeat = constant:value repetition -> Repeat(value)
-repeat = choice:value repetition -> Repeat(value)
-repeat = '(' concat:value ')' repetition -> Repeat(value)
-repeat = '(' choice:value ')' repetition -> Repeat(value)
+constant = constant:value repetition -> Repeat(Constant(value))
+constant = anything:atom ?(atom in '{letters}{digits}') -> Constant(atom)
 
-regex = (repeat | choice | concat | constant)
+expr = expr:left expr:right -> Concat(left, right)
+expr = expr:value repetition -> Repeat(value)
+expr = '(' expr:left ('|' expr:right ')' -> Choice(left, right)
+                      | ')' -> left)
+expr = constant
+
+regex = (expr)
 """.format(letters=string.letters, digits=string.digits)
