@@ -5,6 +5,7 @@ GRAMMAR = """
 constant = anything:atom ?(atom in '{letters}{digits}') -> Constant(atom)
 concat = concat:left constant:right -> Concat(left, right)
 concat = concat:left choice:right -> Concat(left, right)
+concat = constant:left constant:right repetition -> Concat(left, Repeat(right))
 concat = constant:left constant:right -> Concat(left, right)
 concat = constant:left choice:right -> Concat(left, right)
 
@@ -23,5 +24,5 @@ repeat = choice:value repetition -> Repeat(value)
 repeat = '(' concat:value ')' repetition -> Repeat(value)
 repeat = '(' choice:value ')' repetition -> Repeat(value)
 
-expr = (repeat | choice | concat | constant)
+regex = (repeat | choice | concat | constant)
 """.format(letters=string.letters, digits=string.digits)
