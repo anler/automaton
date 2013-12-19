@@ -5,23 +5,37 @@ Currently only the following operators are supported: | and * son you can use re
 such as: (a|b)c or ((a|b))*
 """
 from __future__ import print_function
+import sys
 import argparse
 
 import pygraphviz as g
 
-from automaton.parser import parse
+from automaton.parser import parse, ParseError
 from automaton.nodes import Null
 from automaton.state_machine import to_state_machine
 
 
-def draw_state_machine(state_machine, output):
-    graph = g.AGraph(directed=True, strict=False)
+def mark_as_accepting_state(graph, node):
+    graph_node = graph.get_node(node)
+    graph_node.attr[u'color'] = u'blue'
+    graph_node.attr[u'label'] = u'λ'
 
+
+def draw_state_machine(start_node, state_machine, accepting_states, output):
+    graph = g.AGraph(directed=True, strict=False)
+    graph.add_node(start_node, label=u'>')
     for node, edge in state_machine:
         target_node = state_machine[node, edge]
         if type(target_node) is Null:
             continue
-        graph.add_node(node)
+        if target_node in accepting_states:
+            graph.add_node(target_node)
+            mark_as_accepting_state(graph, target_node)
+        else:
+            graph.add_node(target_node, label=u'')
+        graph.add_node(node, label=u'')
+        if node in accepting_states:
+            mark_as_accepting_state(graph, node)
         graph.add_edge(node, target_node, label=edge)
     graph.layout(prog='circo')
     graph.draw(output)
@@ -38,15 +52,22 @@ def main():
                         help="Output file name. Default 'output.png'")
 
     args = parser.parse_args()
+    regex_string = args.regex
+    output_filename = args.output_filename
 
-    regex = parse(args.regex).regex()
-    state_machine = to_state_machine(regex)
+    try:
+        regex = parse(regex_string).regex()
+    except ParseError:
+        print("Unsupported regular expression")
+        return
+    start_node, state_machine, accepting_states = to_state_machine(regex)
 
     print(u"Regular Expression:", regex)
     print(u"Regular Expression Alphabet (∑):", alphabet(regex))
 
-    draw_state_machine(state_machine, output=args.output_filename)
+    draw_state_machine(start_node, state_machine, accepting_states, output=output_filename)
+    print(u"Graph saved as {!r}".format(output_filename))
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
