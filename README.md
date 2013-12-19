@@ -12,3 +12,5 @@ python demo.py "(a|b*c)"
 Then, `output.png` file will be:
 
 ![Screenshot](screenshot.png)
+
+where the **accepting states are marked in blue** and the **starting node is marked with >**.
