@@ -7,6 +7,12 @@ def encode(unicode_str):
     return unicode_str.encode(ENCODING)
 
 
+def get_value(node):
+    if isinstance(node, AbstractRegex):
+        return get_value(node.value)
+    return node
+
+
 class AbstractRegex(object):
     def __init__(self, value=None):
         self.value = value
@@ -21,7 +27,7 @@ class AbstractRegex(object):
         return self == other
 
     def __eq__(self, other):
-        return self.get_value() == other.get_value()
+        return get_value(self) == get_value(other)
     __cmp__ = __eq__
 
     def __hash__(self):
@@ -35,11 +41,6 @@ class AbstractRegex(object):
 
     def _alphabet(self):
         return []
-
-    def get_value(self):
-        if isinstance(self.value, AbstractRegex):
-            return self.value.get_value()
-        return self.value
 
     @property
     def accepts_lambda(self):
