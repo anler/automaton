@@ -1,13 +1,27 @@
 # -*- coding: utf-8 -*-
+import string
 
-SPECIAL_SYMBOLS = set([".", "*", "?", "+", "^", "$", "|", "[", "[^", "]", "(", ")", "{", "}"])
+GRAMMAR = """
+constant = anything:atom ?(atom in '{letters}{digits}') -> Constant(atom)
+concat = concat:left constant:right -> Concat(left, right)
+concat = concat:left choice:right -> Concat(left, right)
+concat = constant:left constant:right -> Concat(left, right)
+concat = constant:left choice:right -> Concat(left, right)
 
+choice = concat:left '|' concat:right -> Choice(left, right)
+choice = constant:left '|' concat:right -> Choice(left, right)
+choice = choice:left constant:right -> Concat(left, right)
+choice = '(' constant:left '|' constant:right ')' -> Choice(left, right)
+choice = '(' concat:left '|' concat:right ')' -> Choice(left, right)
+choice = concat:left '|' constant:right -> Choice(left, right)
+choice = constant:left '|' constant:right -> Choice(left, right)
 
-def alphabet(re):
-    """Get the associated alphabet of the given regular expression.
+repetition = '*'
 
-    :param re: Regular expression as a string.
+repeat = constant:value repetition -> Repeat(value)
+repeat = choice:value repetition -> Repeat(value)
+repeat = '(' concat:value ')' repetition -> Repeat(value)
+repeat = '(' choice:value ')' repetition -> Repeat(value)
 
-    :return: The alphabet set.
-    """
-    return set(c for c in re if c not in SPECIAL_SYMBOLS)
+expr = (repeat | choice | concat | constant)
+""".format(letters=string.letters, digits=string.digits)
