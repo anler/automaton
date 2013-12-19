@@ -94,6 +94,10 @@ class Null(AbstractRegex):
 class Lambda(Null):
     symbol = u"λ"
 
+    @property
+    def accepts_lambda(self):
+        return True
+
 
 class Constant(AbstractRegex):
     def derive(self, base):
@@ -108,6 +112,10 @@ class Constant(AbstractRegex):
 
 class Choice(AbstractBinaryRegex):
     symbol = u"⋃"
+
+    @property
+    def accepts_lambda(self):
+        return self.left.accepts_lambda or self.right.accepts_lambda
 
     def derive(self, base):
         left = self.left.derive(base)
@@ -140,6 +148,10 @@ class Choice(AbstractBinaryRegex):
 
 class Concat(AbstractBinaryRegex):
     symbol = u"∘"
+
+    @property
+    def accepts_lambda(self):
+        return self.left.accepts_lambda and self.right.accepts_lambda
 
     def derive(self, base):
         left = Concat(self.left.derive(base), self.right)
