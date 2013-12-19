@@ -5,7 +5,7 @@ GRAMMAR = """
 repetition = '*'
 
 constant = constant:value repetition -> Repeat(Constant(value))
-constant = anything:atom ?(atom in '{letters}{digits}') -> Constant(atom)
+constant = anything:atom ?(atom in '{letters}{digits}!_,;') -> Constant(atom)
 
 expr = expr:left expr:right -> Concat(left, right)
 expr = expr:value repetition -> Repeat(value)
